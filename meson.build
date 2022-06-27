@@ -37,7 +37,6 @@ flags = c_compiler.get_supported_arguments(
 )
 
 inc = include_directories('src')
-test_inc = include_directories('tests')
 
 src = files(
   'src/equation.c',
@@ -47,5 +46,3 @@ src = files(
 cc = meson.get_compiler('c')
 x11 = dependency('x11', required: false, disabler: true)
 x11_test = dependency('xtst', required: false, disabler: true)
-
-subdir('tests')
