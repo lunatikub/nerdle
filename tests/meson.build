@@ -3,6 +3,7 @@ test_inc = include_directories('.')
 
 tests = [
   'utils',
+  'equation',
 ]
 
 foreach t : tests

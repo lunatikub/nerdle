@@ -24,6 +24,7 @@ TEST_F(utils, eq_to_str)
   TEST_EQ_TO_STR(s2, "12*49=588");
   TEST_EQ_TO_STR(s3, "------");
 
+#undef TEST_EQ_TO_STR
   return true;
 }
 
@@ -44,6 +45,7 @@ TEST_F(utils, str_to_eq)
   TEST_STR_TO_EQ("12*49=588", s2);
   TEST_STR_TO_EQ("------", s3);
 
+#undef TEST_STR_TO_EQ
   return true;
 }
 
