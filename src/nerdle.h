@@ -41,4 +41,12 @@ void nerdle_destroy(struct nerdle *nerdle);
  */
 void nerdle_generate_equations(struct nerdle *nerdle);
 
+/**
+ * Set the first equation.
+ *
+ * @param nerdle nerdle handle.
+ * @param eq equation to set.
+ */
+void nerdle_set_first_equation(struct nerdle *nerdle, struct equation *eq);
+
 #endif /* !__NERDLE__ */
