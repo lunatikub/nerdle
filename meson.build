@@ -39,8 +39,9 @@ flags = c_compiler.get_supported_arguments(
 inc = include_directories('src')
 
 src = files(
-  'src/equation.c',
   'src/utils.c',
+  'src/equation.c',
+  'src/check_equality.c',
 )
 
 cc = meson.get_compiler('c')

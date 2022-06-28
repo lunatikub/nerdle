@@ -1,7 +1,7 @@
 #include "utils.h"
 #include "test.h"
 
-TEST_F(equation, equation_add_symbol)
+TEST_F(equation, add_symbol)
 {
 #define TEST_EQ_ADD_SYMBOL(STR, SYMBOL, EXPECTED)               \
   ({                                                            \
@@ -24,8 +24,31 @@ TEST_F(equation, equation_add_symbol)
   return true;
 }
 
+TEST_F(equation, check_equality)
+{
+#define TEST_CHECK_EQUALITY(STR, EXPECTED)      \
+  ({                                            \
+    struct equation eq;                         \
+    uint32_t sz = sizeof(STR) - 1;              \
+    memset(&eq, 0, sizeof(eq));                 \
+    eq.sz = sz;                                 \
+    utils_str_to_eq(STR, &eq, sz);              \
+    bool ret = equation_check_equality(&eq);    \
+    EXPECT_TRUE(ret == EXPECTED);               \
+  })
+
+  TEST_CHECK_EQUALITY("10+2=12", true);
+  TEST_CHECK_EQUALITY("1+2=4", false);
+  TEST_CHECK_EQUALITY("12*10=120", true);
+  TEST_CHECK_EQUALITY("12/6+2=4", true);
+
+#undef TEST_CHECK_EQUALITY
+  return true;
+}
+
 const static struct test equation_tests[] = {
-  TEST(equation, equation_add_symbol),
+  TEST(equation, add_symbol),
+  TEST(equation, check_equality),
 };
 
 TEST_SUITE(equation);

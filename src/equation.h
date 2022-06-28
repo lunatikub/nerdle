@@ -30,21 +30,30 @@ enum symbol {
 
 struct equation {
   enum symbol symbols[LIMIT_MAX_EQ_SZ];
+  uint32_t sz;
 };
 
 /**
  * Add a symbol to an equation.
  * Check validity of the add:
  *   1. only one symbol equal is allowed by equation.
- *   2. a symbol operator cannot follow an otheer symbol operator.
+ *   2. a symbol operator cannot follow an other symbol operator.
  *
- * @param eq equation.
+ * @param eq equation handle.
  * @param symbol symbol to add.
- * @param position position in the equation.
+ * @param position position to add in the equation.
  * @return true if the symbol can be added, otherwise return false.
  */
 bool equation_add_symbol(struct equation *eq,
                          enum symbol symbol,
                          uint32_t position);
+
+/**
+ * Check if equality of the equation is right.
+ *
+ * @parma eq equation handle.
+ * @return true if right, otherwise false.
+ */
+bool equation_check_equality(struct equation *eq);
 
 #endif /* !__EQUATION__ */

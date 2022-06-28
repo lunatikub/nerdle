@@ -10,16 +10,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
       - uses: actions/checkout@v2
+
       - name: Install packages
         run: |
           sudo apt-get install pip
           pip3 install --user meson ninja
+
       - name: Build
         run: |
           meson build
           cd build
+          ninja clean
           ninja
+
       - name: Test
         run: |
           cd build
