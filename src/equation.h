@@ -36,8 +36,8 @@ struct equation {
 /**
  * Add a symbol to an equation.
  * Check validity of the add:
- *   1. only one symbol equal is allowed by equation.
- *   2. a symbol operator cannot follow an other symbol operator.
+ *   1. Only one symbol equal is allowed by equation.
+ *   2. A symbol operator cannot follow an other symbol operator.
  *
  * @param eq equation handle.
  * @param symbol symbol to add.
@@ -49,7 +49,20 @@ bool equation_add_symbol(struct equation *eq,
                          uint32_t position);
 
 /**
+ * Check if the semantic is right.
+ *  + 1+1=100: OK.
+ *  + 1=1: KO (need 2 operators).
+ *  + 1+1+1: KO (missing operator '=').
+ *
+ * @param eq equation to check.
+ * @return true if right, otherwise false.
+ */
+bool equation_check_semantic(struct equation *eq);
+
+/**
  * Check if equality of the equation is right.
+ *  + 1 + 12 = 13: OK
+ *  + 1 + 13 = 14: KO
  *
  * @parma eq equation handle.
  * @return true if right, otherwise false.

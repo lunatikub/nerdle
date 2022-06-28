@@ -32,13 +32,9 @@ jobs:
 
       - name: Build
         run: |
-          meson build;
-          cd build;
-          echo "toto";
-          ls -l
-          ninja;
-          cd ..
-          ls -l
+          meson build
+          cd build
+          ninja
 
       - name: Test
         run: |

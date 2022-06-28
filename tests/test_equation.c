@@ -46,8 +46,31 @@ TEST_F(equation, check_equality)
   return true;
 }
 
+TEST_F(equation, check_semantic)
+{
+  static enum symbol s1[] = { 1, SYMBOL_PLUS, 2, 3, SYMBOL_EQ, 2, SYMBOL_PLUS };
+  static enum symbol s2[] = { 1, SYMBOL_PLUS, 2, 3, SYMBOL_EQ, 2 };
+  static enum symbol s3[] = { 1, SYMBOL_EQ, 1 };
+
+#define TEST_CHECK_SEMANTIC(SYMBOLS, EXPECTED)                  \
+  ({                                                            \
+    struct equation eq;                                         \
+    eq.sz = sizeof(SYMBOLS) / sizeof(enum symbol);              \
+    memcpy(eq.symbols, SYMBOLS, sizeof(SYMBOLS));               \
+    bool ret = equation_check_semantic(&eq);                    \
+    EXPECT_TRUE(ret == EXPECTED);                               \
+  })
+
+  TEST_CHECK_SEMANTIC(s1, false);
+  TEST_CHECK_SEMANTIC(s2, true);
+  TEST_CHECK_SEMANTIC(s3, false);
+
+  return true;
+}
+
 const static struct test equation_tests[] = {
   TEST(equation, add_symbol),
+  TEST(equation, check_semantic),
   TEST(equation, check_equality),
 };
 
