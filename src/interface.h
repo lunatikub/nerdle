@@ -20,8 +20,16 @@ interface_t* interface_create(void);
  * Start the interface.
  * Set the properties of the grid.
  *
- * @param in interface previously allocated with @c interface_create.
+ * @param in interface handle.
  */
 void interface_start(interface_t *in);
+
+/**
+ * Write (keyboard emulation) an equation.
+ *
+ * @param in interface handle.
+ * @param eq equation to write.
+ */
+void interface_write(struct interface *in, struct equation *eq);
 
 #endif /* !__INTERFACE__ */

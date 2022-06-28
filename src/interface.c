@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include "equation.h"
 #include "interface.h"
 
 struct coord {
@@ -251,4 +252,51 @@ void interface_start(struct interface *in)
   set_start_coord(in, &start);
   set_horizontal_properties(in, &start);
   set_vertical_properties(in, &start);
+}
+
+static void press_key(struct interface *in, KeyCode keycode)
+{
+#define WAITING_TIME 30000 /* ms */
+  XTestFakeKeyEvent(in->display, keycode, true, 0);
+  XFlush(in->display);
+  usleep(WAITING_TIME);
+  XTestFakeKeyEvent(in->display, keycode, false, 0);
+  XFlush(in->display);
+#undef WAITING_TIME
+}
+
+void interface_write(struct interface *in, struct equation *eq)
+{
+  KeyCode keycode;
+
+#define CASE_KEYCODE(SYMBOL, KEYCODE)           \
+  case SYMBOL:                                  \
+    keycode = KEYCODE;                          \
+    break
+
+  for (uint32_t i = 0; i < eq->sz; ++i) {
+    switch (eq->symbols[i]) {
+      CASE_KEYCODE(SYMBOL_PLUS, 86);
+      CASE_KEYCODE(SYMBOL_MINUS, 82);
+      CASE_KEYCODE(SYMBOL_DIV, 106);
+      CASE_KEYCODE(SYMBOL_MULT, 63);
+      CASE_KEYCODE(SYMBOL_EQ, 21);
+      CASE_KEYCODE(SYMBOL_1, 10);
+      CASE_KEYCODE(SYMBOL_2, 11);
+      CASE_KEYCODE(SYMBOL_3, 12);
+      CASE_KEYCODE(SYMBOL_4, 13);
+      CASE_KEYCODE(SYMBOL_5, 14);
+      CASE_KEYCODE(SYMBOL_6, 15);
+      CASE_KEYCODE(SYMBOL_7, 16);
+      CASE_KEYCODE(SYMBOL_8, 17);
+      CASE_KEYCODE(SYMBOL_9, 18);
+      CASE_KEYCODE(SYMBOL_0, 19);
+      case SYMBOL_END:
+        return;
+    };
+    press_key(in, keycode);
+  }
+  press_key(in, 36); // return
+
+#undef CASE_KEYCODE
 }
