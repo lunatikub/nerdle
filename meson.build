@@ -49,3 +49,12 @@ x11 = dependency('x11', required: false, disabler: true)
 x11_test = dependency('xtst', required: false, disabler: true)
 
 subdir('tests')
+
+executable(
+  'nerdle',
+  src,
+  'src/main.c',
+  include_directories: inc,
+  c_args: flags,
+  dependencies : [ x11, x11_test ],
+)
