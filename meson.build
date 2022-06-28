@@ -42,6 +42,7 @@ src = files(
   'src/utils.c',
   'src/equation.c',
   'src/check_equality.c',
+  'src/nerdle.c',
 )
 
 cc = meson.get_compiler('c')
