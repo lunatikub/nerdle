@@ -30,6 +30,15 @@ void interface_start(interface_t *in);
  * @param in interface handle.
  * @param eq equation to write.
  */
-void interface_write(struct interface *in, struct equation *eq);
+void interface_write(interface_t *in, struct equation *eq);
+
+/**
+ * Wait end of a round.
+ *
+ * @param in interface handle.
+ * @param round number of the round.
+ * @param sz size of the equation.
+ */
+void interface_wait_round_end(struct interface *in, uint32_t round, uint32_t sz);
 
 #endif /* !__INTERFACE__ */

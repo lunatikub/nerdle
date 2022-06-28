@@ -54,9 +54,9 @@ static bool color_approx_eq(const struct color *c1, const struct color *c2)
  */
 static const struct color c_empty = { 231, 235, 241 };
 static const struct color c_white = { 255, 255, 255 };
-//static const struct color c_right = { 87, 172, 120 };
-//static const struct color c_wrong = { 233, 198, 1 };
-//static const struct color c_discarded = { 162, 162, 162 };
+static const struct color c_right = { 87, 172, 120 };
+static const struct color c_wrong = { 233, 198, 1 };
+static const struct color c_discarded = { 162, 162, 162 };
 
 /**
  * Use x11 as the interface with the site.
@@ -299,4 +299,41 @@ void interface_write(struct interface *in, struct equation *eq)
   press_key(in, 36); // return
 
 #undef CASE_KEYCODE
+}
+
+/**
+ * This is the margin between the left-up corner
+ * of a location and the color inside the location.
+ * ___
+ * | |
+ * ---
+ * This is in pixels.
+ */
+#define MARGIN 5
+
+static void get_location(struct interface *in, uint32_t round,
+                         unsigned i, struct coord *coord)
+{
+  coord->x = in->first.x + (in->width_space_sz + in->width_loc_sz) * i + MARGIN;
+  coord->y = in->first.y + (in->height_space_sz + in->height_loc_sz) * round + MARGIN;
+}
+
+#undef MARGIN
+
+void interface_wait_round_end(struct interface *in, uint32_t round, uint32_t sz)
+{
+  struct coord coord;
+  struct color color = { 0, 0, 0 };
+
+#define WAITING_TIME 20000 /* ms */
+  while (color_approx_eq(&color, &c_right) == false &&
+         color_approx_eq(&color, &c_wrong) == false &&
+         color_approx_eq(&color, &c_discarded) == false) {
+    image_refresh(in);
+    /* last location of the last grid of the line `round` */
+    get_location(in, round, sz - 1, &coord);
+    get_color_pixel(in, coord.x, coord.y, &color);
+    usleep(WAITING_TIME);
+  }
+#undef WAITING_TIME
 }
