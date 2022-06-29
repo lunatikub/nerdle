@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#include "nerdle.h"
+
 /**
  * Opaque structure used as an interface with the game on the site.
  */
@@ -39,6 +41,20 @@ void interface_write(interface_t *in, struct equation *eq);
  * @param round number of the round.
  * @param sz size of the equation.
  */
-void interface_wait_round_end(struct interface *in, uint32_t round, uint32_t sz);
+void interface_wait_round_end(interface_t *in, uint32_t round, uint32_t sz);
+
+/**
+ * At the end of a round, get the status of all locations.
+ *
+ * @param nerdle nerdle handle.
+ * @param in interface handle.
+ * @param round number of the round.
+ * @param eq equation to evaluate.
+ * @return true if win, otherwise return false.
+ */
+bool interface_get_status(struct nerdle *nerdle,
+                          struct interface *in,
+                          uint32_t round,
+                          const struct equation *eq);
 
 #endif /* !__INTERFACE__ */

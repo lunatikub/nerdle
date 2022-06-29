@@ -11,6 +11,16 @@
  */
 
 /**
+ * Status of a location.
+ */
+enum status {
+  UNKNOWN,
+  DISCARDED,
+  WRONG,
+  RIGHT,
+};
+
+/**
  * Limits of the equation size.
  */
 #define LIMIT_MIN_EQ_SZ 5

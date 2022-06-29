@@ -17,6 +17,9 @@ struct nerdle {
   struct candidate *candidates;
   uint64_t nr_candidate;
   uint32_t limit;
+  enum symbol right[LIMIT_MAX_EQ_SZ];
+  bool discarded[SYMBOL_END];
+  bool wrong[SYMBOL_END][LIMIT_MAX_EQ_SZ];
 };
 
 /**
