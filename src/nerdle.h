@@ -52,4 +52,11 @@ void nerdle_generate_equations(struct nerdle *nerdle);
  */
 void nerdle_set_first_equation(struct nerdle *nerdle, struct equation *eq);
 
+/**
+ * Remove all candidates not respecting the status [right/discarded/wrong_position].
+ *
+ * @param nerdle nerdle handle.
+ */
+void nerdle_check_candidates(struct nerdle *nerdle);
+
 #endif /* !__NERDLE__ */

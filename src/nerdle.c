@@ -52,6 +52,27 @@ static bool nerdle_candidate_add(struct nerdle *nerdle, struct equation *eq)
   return true;
 }
 
+
+/**
+ * Check if the symbol at the position is:
+ *  + Not discarded.
+ *  + At the right position if needed.
+ *  + In the equation but not at the good position.
+ */
+static bool nerdle_check_symbol(struct nerdle *nerdle, enum symbol symbol, uint32_t position)
+{
+  if (nerdle->discarded[symbol] == true) {
+    return false;
+  }
+  if (nerdle->right[position] != 0 && nerdle->right[position] != symbol) {
+    return false;
+  }
+  if (nerdle->wrong[symbol][position] == true) {
+    return false;
+  }
+  return true;
+}
+
 static bool nerdle_generate_equations_rec(struct nerdle *nerdle,
                                           struct equation *eq,
                                           uint32_t position)
@@ -66,6 +87,9 @@ static bool nerdle_generate_equations_rec(struct nerdle *nerdle,
   }
 
   for (uint32_t i = SYMBOL_0; i < SYMBOL_END; ++i) {
+    if (nerdle_check_symbol(nerdle, i, position) == false) {
+      continue;
+    }
     if (equation_add_symbol(eq, i, position) == true) {
       if (nerdle_generate_equations_rec(nerdle, eq, position + 1) == false) {
         return false;
@@ -84,6 +108,9 @@ void nerdle_generate_equations(struct nerdle *nerdle)
      Reducing the number of initial branches of the tree */
   for (uint32_t i = SYMBOL_1; i <= SYMBOL_9; ++i) {
     eq.symbols[0] = i;
+    if (nerdle_check_symbol(nerdle, i, 0) == false) {
+      continue;
+    }
     if (nerdle_generate_equations_rec(nerdle, &eq, 1) == false) {
       break;
     }
@@ -162,4 +189,39 @@ void nerdle_set_first_equation(struct nerdle *nerdle, struct equation *eq)
 
 #undef CASE_SET_EQ
   };
+}
+
+static void remove_candidate(struct nerdle *nerdle, struct candidate *candidate)
+{
+  if (candidate->prev == NULL) { /* head */
+    nerdle->candidates = candidate->next;
+  } else {
+    candidate->prev->next = candidate->next;
+  }
+  if (candidate->next != NULL) {
+    candidate->next->prev = candidate->prev;
+  }
+  free(candidate);
+  --nerdle->nr_candidate;
+}
+
+static struct candidate*
+check_candidate(struct nerdle *nerdle, struct candidate *candidate)
+{
+  for (unsigned i = 0; i < nerdle->sz; ++i) {
+    if (nerdle_check_symbol(nerdle, candidate->eq.symbols[i], i) == false) {
+      struct candidate *next = candidate->next;
+      remove_candidate(nerdle, candidate);
+      return next;
+    }
+  }
+  return candidate->next;
+}
+
+void nerdle_check_candidates(struct nerdle *nerdle)
+{
+  struct candidate *candidate = nerdle->candidates;
+  while (candidate != NULL) {
+    candidate = check_candidate(nerdle, candidate);
+  }
 }
