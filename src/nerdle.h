@@ -59,4 +59,13 @@ void nerdle_set_first_equation(struct nerdle *nerdle, struct equation *eq);
  */
 void nerdle_check_candidates(struct nerdle *nerdle);
 
+/**
+ * Find the best equations in the list of candidates.
+ * Best is based on the variance of the symbols.
+ *
+ * @param nerdle nerdle handle.
+ * @param eq best equation output.
+ */
+void nerdle_find_best_equation(struct nerdle *nerdle, struct equation *eq);
+
 #endif /* !__NERDLE__ */

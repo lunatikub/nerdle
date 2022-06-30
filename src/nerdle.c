@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -115,6 +116,8 @@ void nerdle_generate_equations(struct nerdle *nerdle)
       break;
     }
   }
+  printf("[nerdle] generate %lu equations (limit:%u)\n",
+         nerdle->nr_candidate, nerdle->limit);
 }
 
 #define D SYMBOL_DIV
@@ -191,6 +194,9 @@ void nerdle_set_first_equation(struct nerdle *nerdle, struct equation *eq)
   };
 }
 
+/**
+ * Remove a candidate from the list of candidate.
+ */
 static void remove_candidate(struct nerdle *nerdle, struct candidate *candidate)
 {
   if (candidate->prev == NULL) { /* head */
@@ -205,6 +211,10 @@ static void remove_candidate(struct nerdle *nerdle, struct candidate *candidate)
   --nerdle->nr_candidate;
 }
 
+/**
+ * Check if a candidate doesn't respect the status, in this case remove it
+ * from the lsit of candidate.
+ */
 static struct candidate*
 check_candidate(struct nerdle *nerdle, struct candidate *candidate)
 {
@@ -220,8 +230,50 @@ check_candidate(struct nerdle *nerdle, struct candidate *candidate)
 
 void nerdle_check_candidates(struct nerdle *nerdle)
 {
+  uint64_t nr_candidate_before = nerdle->nr_candidate;
   struct candidate *candidate = nerdle->candidates;
   while (candidate != NULL) {
     candidate = check_candidate(nerdle, candidate);
   }
+  printf("[nerdle] remove %lu candidates, %lu candidates remaining\n",
+         nr_candidate_before - nerdle->nr_candidate, nerdle->nr_candidate);
+}
+
+/**
+ * Variance means the number of different symbol in the equation.
+ */
+static uint32_t candidate_get_variance(struct candidate *candidate)
+{
+  unsigned variance = 0;
+  bool once[SYMBOL_END] = { false };
+
+  for (unsigned i = 0; i < candidate->eq.sz; ++i) {
+    enum symbol symbol = candidate->eq.symbols[i];
+    if (once[symbol] == false) {
+      once[symbol] = true;
+      ++variance;
+    }
+  }
+
+  return variance;
+}
+
+void nerdle_find_best_equation(struct nerdle *nerdle, struct equation *eq)
+{
+  assert(nerdle->nr_candidate > 0);
+
+  struct candidate *candidate = nerdle->candidates;
+  struct candidate *best_candidate = candidate;
+  unsigned best_variance = 0;
+
+  while (candidate != NULL) {
+    unsigned variance = candidate_get_variance(candidate);
+    if (variance > best_variance) {
+      best_variance = variance;
+      best_candidate = candidate;
+    }
+    candidate = candidate->next;
+  }
+
+  memcpy(eq, &best_candidate->eq, sizeof(struct equation));
 }
