@@ -13,11 +13,13 @@ bool equation_add_symbol(struct equation *eq,
     }
   }
 
-  /* A symbol operator cannot follow an other symbol operator. */
+  /* A symbol operator cannot follow an other symbol operator.
+     A synmbol '0' cannot follow a symbol operator. */
   enum symbol last = eq->symbols[position - 1];
-  if (last > SYMBOL_9 && symbol > SYMBOL_9) {
+  if (last > SYMBOL_9 && (symbol > SYMBOL_9 || symbol == SYMBOL_0)) {
     return false;
   }
+
 
   eq->symbols[position] = symbol;
   return true;

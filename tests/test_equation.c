@@ -13,6 +13,7 @@ TEST_F(equation, add_symbol)
     EXPECT_TRUE(ret == EXPECTED);                               \
   })
 
+  TEST_EQ_ADD_SYMBOL("1=", SYMBOL_0, false);
   TEST_EQ_ADD_SYMBOL("1=1", SYMBOL_EQ, false);
   TEST_EQ_ADD_SYMBOL("1", SYMBOL_PLUS, true);
   TEST_EQ_ADD_SYMBOL("1+", SYMBOL_2, true);
