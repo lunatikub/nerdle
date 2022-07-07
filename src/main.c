@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <getopt.h>
 
 #include "nerdle.h"
 #include "utils.h"
@@ -19,11 +20,44 @@ static void dump_equation(const struct equation *eq)
   printf("[nerdle] equation: %.*s\n", eq->sz, str);
 }
 
-int main(void)
+enum {
+  CASE_SIZE,
+};
+
+static struct option long_options[] = {
+  { "size", required_argument, 0, 0 },
+};
+
+struct options {
+  uint32_t sz;
+};
+
+static void options_parse(int argc, char **argv, struct options *opts)
 {
-  uint32_t sz = 9;
-  printf("[nerdle] sz:%u\n", 9);
-  struct nerdle *nerdle = nerdle_create(sz);
+  opts->sz = DEFAULT_SIZE;
+
+  while (true) {
+    int option_index = 0;
+    int c = getopt_long(argc, argv, "", long_options, &option_index);
+    if (c == -1) {
+      break;
+    }
+    switch (option_index) {
+      case CASE_SIZE:
+        opts->sz = atoi(optarg);
+        break;
+    }
+  }
+}
+
+int main(int argc, char **argv)
+{
+  struct options opts;
+
+  options_parse(argc, argv, &opts);
+
+  printf("[nerdle] sz:%u\n", opts.sz);
+  struct nerdle *nerdle = nerdle_create(opts.sz);
   interface_t *in = interface_create();
   struct equation eq;
 
@@ -35,8 +69,8 @@ int main(void)
     printf("[nerdle] -------------------------- {round:%u}\n", round);
     dump_equation(&eq);
     interface_write(in, &eq);
-    interface_wait_round_end(in, round, nerdle->sz);
     if (interface_get_status(nerdle, in, round, &eq) == true) {
+      printf("[nerdle] WIN !\n");
       break;
     }
     nerdle_dump_status(nerdle);
