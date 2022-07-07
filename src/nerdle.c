@@ -395,4 +395,5 @@ void nerdle_find_best_equation(struct nerdle *nerdle, struct equation *eq)
   }
 
   memcpy(eq, &best_candidate->eq, sizeof(struct equation));
+  remove_candidate(nerdle, best_candidate);
 }
