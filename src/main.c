@@ -22,19 +22,23 @@ static void dump_equation(const struct equation *eq)
 
 enum {
   CASE_SIZE,
+  CASE_LIMIT,
 };
 
 static struct option long_options[] = {
   { "size", required_argument, 0, 0 },
+  { "limit", required_argument, 0, 0 },
 };
 
 struct options {
   uint32_t sz;
+  uint32_t limit;
 };
 
 static void options_parse(int argc, char **argv, struct options *opts)
 {
   opts->sz = DEFAULT_SIZE;
+  opts->limit = 0;
 
   while (true) {
     int option_index = 0;
@@ -45,6 +49,9 @@ static void options_parse(int argc, char **argv, struct options *opts)
     switch (option_index) {
       case CASE_SIZE:
         opts->sz = atoi(optarg);
+        break;
+      case CASE_LIMIT:
+        opts->limit = atoi(optarg);
         break;
     }
   }
@@ -57,7 +64,7 @@ int main(int argc, char **argv)
   options_parse(argc, argv, &opts);
 
   printf("[nerdle] sz:%u\n", opts.sz);
-  struct nerdle *nerdle = nerdle_create(opts.sz);
+  struct nerdle *nerdle = nerdle_create(opts.sz, opts.limit);
   interface_t *in = interface_create();
   struct equation eq;
 

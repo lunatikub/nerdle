@@ -15,12 +15,12 @@ struct candidate {
 struct nerdle {
   /* Size of the equation */
   uint32_t sz;
+  /* Limit the number of candidates generated (performance issue) */
+  uint32_t limit;
   /* Status */
   enum status status[SYMBOL_END];
   enum symbol right[LIMIT_MAX_EQ_SZ];
   bool wrong[LIMIT_MAX_EQ_SZ][SYMBOL_END];
-  /* Limit the number of branches in the generation of candidates */
-  uint32_t limit;
   /* List of candidates */
   struct candidate *candidates;
   uint64_t nr_candidate;
@@ -30,9 +30,10 @@ struct nerdle {
  * Create a nerdle IA.
  *
  * @param sz size of the equation.
+ * @param limit limit the number of candidates.
  * @return nerdle handle allocated.
  */
-struct nerdle* nerdle_create(uint32_t sz);
+struct nerdle* nerdle_create(uint32_t sz, uint32_t limit);
 
 /**
  * Destroy a nerdle IA previously allocated from @c nerdle_create.

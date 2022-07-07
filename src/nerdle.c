@@ -5,7 +5,7 @@
 
 #include "nerdle.h"
 
-struct nerdle* nerdle_create(uint32_t sz)
+struct nerdle* nerdle_create(uint32_t sz, uint32_t limit)
 {
   uint32_t s;
   uint32_t p;
@@ -14,6 +14,7 @@ struct nerdle* nerdle_create(uint32_t sz)
 
   struct nerdle *nerdle = calloc(1, sizeof(*nerdle));
   nerdle->sz = sz;
+  nerdle->limit = limit;
 
   for (s = 0; s < SYMBOL_END; ++s) {
     nerdle->status[s] = UNKNOWN;
