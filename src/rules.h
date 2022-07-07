@@ -31,4 +31,9 @@ enum status {
  */
 #define MAX_NR_ROUND 6
 
+/**
+ * Default size of the nerdle game.
+ */
+#define DEFAULT_SIZE 8
+
 #endif /* !__RULES__ */

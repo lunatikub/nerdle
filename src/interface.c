@@ -320,11 +320,17 @@ static void get_location(struct interface *in, uint32_t round,
 
 #undef MARGIN
 
-void interface_wait_round_end(struct interface *in, uint32_t round, uint32_t sz)
+/**
+ * Wait end of a round.
+ * Return true if timeout
+ */
+static bool interface_wait_round_end(struct interface *in, uint32_t round, uint32_t sz)
 {
   struct coord coord;
   struct color color = { 0, 0, 0 };
+  uint32_t tot = 0;
 
+#define TIMEOUT 100000 /* 1 sec */
 #define WAITING_TIME 20000 /* ms */
   while (color_approx_eq(&color, &c_right) == false &&
          color_approx_eq(&color, &c_wrong) == false &&
@@ -334,8 +340,14 @@ void interface_wait_round_end(struct interface *in, uint32_t round, uint32_t sz)
     get_location(in, round, sz - 1, &coord);
     get_color_pixel(in, coord.x, coord.y, &color);
     usleep(WAITING_TIME);
+    tot += WAITING_TIME;
+    if (tot >= TIMEOUT) {
+      return true;
+    }
   }
+  return false;
 #undef WAITING_TIME
+#undef TIMEOUT_WIN
 }
 
 static enum status status_map_from_colors(struct color *color)
@@ -379,14 +391,18 @@ bool interface_get_status(struct nerdle *nerdle,
   struct color color;
   enum status status;
 
+  if (interface_wait_round_end(in, round, nerdle->sz) == true) {
+    return true;
+  }
+
   printf("[nerdle] [");
   for (uint32_t i = 0; i < eq->sz; ++i) {
     get_location(in, round, i, &loc);
     get_color_pixel(in, loc.x, loc.y, &color);
     status = status_map_from_colors(&color);
     if (status == UNKNOWN) {
-      printf("...]\n[nerdle] WIN !\n");
-      return true; /* win */
+      printf("......]\n");
+      return true;
     }
     status_dump(status);
     nerdle_update_status(nerdle, status, eq, i);

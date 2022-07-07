@@ -35,15 +35,6 @@ void interface_start(interface_t *in);
 void interface_write(interface_t *in, struct equation *eq);
 
 /**
- * Wait end of a round.
- *
- * @param in interface handle.
- * @param round number of the round.
- * @param sz size of the equation.
- */
-void interface_wait_round_end(interface_t *in, uint32_t round, uint32_t sz);
-
-/**
  * At the end of a round, get the status of all locations.
  *
  * @param nerdle nerdle handle.
