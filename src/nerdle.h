@@ -13,13 +13,17 @@ struct candidate {
 };
 
 struct nerdle {
-  uint32_t sz; /* size of the equation */
+  /* Size of the equation */
+  uint32_t sz;
+  /* Status */
+  enum status status[SYMBOL_END];
+  enum symbol right[LIMIT_MAX_EQ_SZ];
+  bool wrong[LIMIT_MAX_EQ_SZ][SYMBOL_END];
+  /* Limit the number of branches in the generation of candidates */
+  uint32_t limit;
+  /* List of candidates */
   struct candidate *candidates;
   uint64_t nr_candidate;
-  uint32_t limit;
-  enum symbol right[LIMIT_MAX_EQ_SZ];
-  bool discarded[SYMBOL_END];
-  bool wrong[SYMBOL_END][LIMIT_MAX_EQ_SZ];
 };
 
 /**
@@ -67,5 +71,23 @@ void nerdle_check_candidates(struct nerdle *nerdle);
  * @param eq best equation output.
  */
 void nerdle_find_best_equation(struct nerdle *nerdle, struct equation *eq);
+
+/**
+ * Update the status of a location of the equation.
+ *
+ * @param nerdle nerdle handle.
+ * @param status status to set.
+ * @param eq equation to update.
+ * @param i index of the location.
+ */
+void nerdle_update_status(struct nerdle *nerdle, enum status status,
+                          const struct equation *eq, uint32_t i);
+
+/**
+ * Dump the status of a round.
+ *
+ * @param nerdle nerdle handle.
+ */
+void nerdle_dump_status(const struct nerdle *nerdle);
 
 #endif /* !__NERDLE__ */

@@ -7,10 +7,24 @@
 
 struct nerdle* nerdle_create(uint32_t sz)
 {
+  uint32_t s;
+  uint32_t p;
+
   assert(sz >= LIMIT_MIN_EQ_SZ && sz <= LIMIT_MAX_EQ_SZ);
 
   struct nerdle *nerdle = calloc(1, sizeof(*nerdle));
   nerdle->sz = sz;
+
+  for (s = 0; s < SYMBOL_END; ++s) {
+    nerdle->status[s] = UNKNOWN;
+  }
+  for (p = 0; p < LIMIT_MAX_EQ_SZ; ++p) {
+    nerdle->right[p] = SYMBOL_END;
+    for (s = 0; s < SYMBOL_END; ++s) {
+      nerdle->wrong[p][s] = false;
+    }
+  }
+
   return nerdle;
 }
 
@@ -58,20 +72,125 @@ static bool nerdle_candidate_add(struct nerdle *nerdle, struct equation *eq)
  * Check if the symbol at the position is:
  *  + Not discarded.
  *  + At the right position if needed.
- *  + In the equation but not at the good position.
  */
-static bool nerdle_check_symbol(struct nerdle *nerdle, enum symbol symbol, uint32_t position)
+static bool nerdle_check_symbol(struct nerdle *nerdle, enum symbol symbol, uint32_t pos)
 {
-  if (nerdle->discarded[symbol] == true) {
+  if (nerdle->status[symbol] == DISCARDED) {
     return false;
   }
-  if (nerdle->right[position] != 0 && nerdle->right[position] != symbol) {
+  if (nerdle->right[pos] != SYMBOL_END &&
+      nerdle->right[pos] != symbol) {
     return false;
   }
-  if (nerdle->wrong[symbol][position] == true) {
+  if (nerdle->wrong[pos][symbol] == true) {
     return false;
   }
   return true;
+}
+
+void nerdle_update_status(struct nerdle *nerdle, enum status status,
+                          const struct equation *eq, uint32_t pos)
+{
+  enum symbol symbol = eq->symbols[pos];
+
+  switch (status) {
+    case DISCARDED:
+      if (nerdle->status[symbol] == UNKNOWN) {
+        nerdle->status[symbol] = DISCARDED;
+      }
+      break;
+    case WRONG:
+      nerdle->status[symbol] = WRONG;
+      nerdle->wrong[pos][symbol] = true;
+      break;
+    case RIGHT:
+      nerdle->status[symbol] = RIGHT;
+      nerdle->right[pos] = symbol;
+      break;
+    default:
+      ;
+  };
+}
+
+static char symbol_to_char(enum symbol symbol)
+{
+  if (symbol >= 0 && symbol <= 9) {
+    return '0' + symbol;
+  }
+  switch (symbol) {
+    case SYMBOL_PLUS: return '+';
+    case SYMBOL_MINUS: return '-';
+    case SYMBOL_MULT: return '*';
+    case SYMBOL_DIV: return '/';
+    case SYMBOL_EQ: return '=';
+    default:;
+  }
+  return '_';
+}
+
+static char status_to_char(enum status status)
+{
+  switch (status) {
+    case UNKNOWN: return 'U';
+    case RIGHT: return 'R';
+    case WRONG: return 'W';
+    case DISCARDED: return 'D';
+  };
+  return 'X';
+}
+
+static void dump_status_status(const struct nerdle *nerdle)
+{
+  printf("[nerdle] status [");
+  for (enum symbol symbol = 0; symbol < SYMBOL_END; ++symbol) {
+    printf("{%c:%c},", symbol_to_char(symbol),
+           status_to_char(nerdle->status[symbol]));
+  }
+  printf("]\n");
+}
+
+static void dump_status_right(const struct nerdle *nerdle)
+{
+  printf("[nerdle] right [");
+  for (uint32_t pos = 0; pos < nerdle->sz; ++pos) {
+    printf("%c", nerdle->right[pos] != SYMBOL_END ?
+           symbol_to_char(nerdle->right[pos]) : ' ');
+  }
+  printf("]\n");
+}
+
+static void dump_status_wrong(const struct nerdle *nerdle)
+{
+  printf("[nerdle] wrong [");
+  for (uint32_t pos = 0; pos < nerdle->sz; ++pos) {
+    printf("{%u: [", pos);
+    for (enum symbol symbol = 0; symbol < SYMBOL_END; ++symbol) {
+      if (nerdle->wrong[pos][symbol] == true) {
+        printf("%c, ", symbol_to_char(symbol));
+      }
+    }
+    printf("]}, ");
+  }
+  printf("]\n");
+}
+
+static void dump_status_discarded(const struct nerdle *nerdle)
+{
+  printf("[nerdle] discarded [");
+  for (enum symbol symbol = 0; symbol < SYMBOL_END; ++symbol) {
+    if (nerdle->status[symbol] == DISCARDED) {
+      printf("'%c', ", symbol_to_char(symbol));
+    }
+  }
+  printf("]\n");
+}
+
+void nerdle_dump_status(const struct nerdle *nerdle)
+{
+  dump_status_status(nerdle);
+  dump_status_right(nerdle);
+  dump_status_wrong(nerdle);
+  dump_status_discarded(nerdle);
 }
 
 static bool nerdle_generate_equations_rec(struct nerdle *nerdle,

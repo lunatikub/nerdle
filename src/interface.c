@@ -370,28 +370,6 @@ static void status_dump(enum status status)
   printf("\033[0m");
 }
 
-static void update_status(struct nerdle *nerdle,
-                          enum status status,
-                          const struct equation *eq,
-                          unsigned i)
-{
-  enum symbol symbol = eq->symbols[i];
-
-  switch (status) {
-    case DISCARDED:
-      nerdle->discarded[symbol] = true;
-      break;
-    case WRONG:
-      nerdle->wrong[symbol][i] = true;
-      break;
-    case RIGHT:
-      nerdle->right[i] = symbol;
-      break;
-    default:
-      ;
-  };
-}
-
 bool interface_get_status(struct nerdle *nerdle,
                           struct interface *in,
                           uint32_t round,
@@ -400,25 +378,20 @@ bool interface_get_status(struct nerdle *nerdle,
   struct coord loc;
   struct color color;
   enum status status;
-  uint32_t nr_right = 0;
 
-  printf("[nerdle] {round:%u} ", round + 1);
-
-  printf("[");
+  printf("[nerdle] [");
   for (uint32_t i = 0; i < eq->sz; ++i) {
     get_location(in, round, i, &loc);
     get_color_pixel(in, loc.x, loc.y, &color);
     status = status_map_from_colors(&color);
-    assert(status != UNKNOWN);
-    nr_right += status == RIGHT ? 1 : 0;
+    if (status == UNKNOWN) {
+      printf("...]\n[nerdle] WIN !\n");
+      return true; /* win */
+    }
     status_dump(status);
-    update_status(nerdle, status, eq, i);
+    nerdle_update_status(nerdle, status, eq, i);
   }
   printf("] ");
   printf("\n");
-  if (nr_right == eq->sz) {
-    printf("[nerdle] win !\n");
-    return true;
-  }
   return false;
 }
