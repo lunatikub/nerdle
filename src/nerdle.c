@@ -380,6 +380,10 @@ static uint32_t candidate_get_variance(struct candidate *candidate)
 
 void nerdle_find_best_equation(struct nerdle *nerdle, struct equation *eq)
 {
+  nerdle_check_candidates(nerdle);
+  if (nerdle->nr_candidate == 0) {
+    nerdle_generate_equations(nerdle);
+  }
   assert(nerdle->nr_candidate > 0);
 
   struct candidate *candidate = nerdle->candidates;

@@ -81,11 +81,6 @@ int main(int argc, char **argv)
       break;
     }
     nerdle_dump_status(nerdle);
-    if (round == 0) {
-      nerdle_generate_equations(nerdle);
-    } else {
-      nerdle_check_candidates(nerdle);
-    }
     nerdle_find_best_equation(nerdle, &eq);
   }
 
