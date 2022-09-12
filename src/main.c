@@ -5,6 +5,7 @@
 #include "nerdle.h"
 #include "utils.h"
 #include "interface.h"
+#include "first_equations.h"
 
 /**
  * This bot plays on the following URL: https://wordleplay.com/fr/nerdle
@@ -65,6 +66,10 @@ int main(int argc, char **argv)
 
   printf("[nerdle] sz:%u\n", opts.sz);
   struct nerdle *nerdle = nerdle_create(opts.sz, opts.limit);
+
+  nerdle_generate_best_variance_equations(nerdle);
+  return 0;
+
   interface_t *in = interface_create();
   struct equation eq;
 

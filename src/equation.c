@@ -49,3 +49,22 @@ bool equation_check_semantic(struct equation *eq)
 
   return true;
 }
+
+/**
+ * Variance means the number of different symbol in the equation.
+ */
+uint32_t equation_get_variance(const struct equation *eq)
+{
+  unsigned variance = 0;
+  bool once[SYMBOL_END] = { false };
+
+  for (unsigned i = 0; i < eq->sz; ++i) {
+    enum symbol symbol = eq->symbols[i];
+    if (once[symbol] == false) {
+      once[symbol] = true;
+      ++variance;
+    }
+  }
+
+  return variance;
+}

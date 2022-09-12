@@ -69,4 +69,6 @@ bool equation_check_semantic(struct equation *eq);
  */
 bool equation_check_equality(struct equation *eq);
 
+uint32_t equation_get_variance(const struct equation *eq);
+
 #endif /* !__EQUATION__ */

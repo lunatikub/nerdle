@@ -55,7 +55,7 @@ void nerdle_generate_equations(struct nerdle *nerdle);
  * @param nerdle nerdle handle.
  * @param eq equation to set.
  */
-void nerdle_set_first_equation(struct nerdle *nerdle, struct equation *eq);
+/* void nerdle_set_first_equation(struct nerdle *nerdle, struct equation *eq); */
 
 /**
  * Remove all candidates not respecting the status [right/discarded/wrong_position].
@@ -90,5 +90,7 @@ void nerdle_update_status(struct nerdle *nerdle, enum status status,
  * @param nerdle nerdle handle.
  */
 void nerdle_dump_status(const struct nerdle *nerdle);
+
+void nerdle_generate_best_variance_equations(struct nerdle *nerdle);
 
 #endif /* !__NERDLE__ */

@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "nerdle.h"
+#include "utils.h"
 
 struct nerdle* nerdle_create(uint32_t sz, uint32_t limit)
 {
@@ -67,7 +68,6 @@ static bool nerdle_candidate_add(struct nerdle *nerdle, struct equation *eq)
   }
   return true;
 }
-
 
 /**
  * Check if the symbol at the position is:
@@ -240,79 +240,47 @@ void nerdle_generate_equations(struct nerdle *nerdle)
          nerdle->nr_candidate, nerdle->limit);
 }
 
-#define D SYMBOL_DIV
-#define X SYMBOL_MULT
-#define P SYMBOL_PLUS
-#define M SYMBOL_MINUS
-#define E SYMBOL_EQ
-
-/* 1 + 2 = 3 */
-static const enum symbol first_eq_5[] = {
-  1, P, 2, E, 3,
-};
-
-/* 10 - 2 = 8 */
-static const enum symbol first_eq_6[] = {
-  1, 0, M, 2, E, 8,
-};
-
-/* 23 - 19 = 4 */
-static const enum symbol first_eq_7[] = {
-  2, 3, M, 1, 9, E, 4,
-};
-
-/* 9 + 8 - 3 = 14 */
-static const enum symbol first_eq_8[] = {
-  9, P, 8, M, 3, E, 1, 4,
-};
-
-/* 20 + 3 - 8 = 15 */
-static const enum symbol first_eq_9[] = {
-  2, 0, P, 3, M, 8, E, 1, 5,
-};
-
-/* 10 + 20 / 5 = 14 */
-static const enum symbol first_eq_10[] = {
-  1, 0, P, 2, 0, D, 5, E, 1, 4,
-};
-
-/* 10 + 250 / 5 = 60 */
-static const enum symbol first_eq_11[] = {
-  1, 0, P, 2, 5, 0, D, 5, E, 6, 0,
-};
-
-/* 10 + 350 / 50 = 17 */
-static const enum symbol first_eq_12[] = {
-  1, 0, P, 3, 5, 0, D, 5, 0, E, 1, 7,
-};
-
-#undef D
-#undef X
-#undef P
-#undef M
-#undef E
-
-void nerdle_set_first_equation(struct nerdle *nerdle, struct equation *eq)
+static void nerdle_generate_best_variance_equations_rec(struct nerdle *nerdle,
+                                                        struct equation *eq,
+                                                        uint32_t position)
 {
-  switch (nerdle->sz) {
-#define CASE_SET_EQ(SZ, SYMBOLS)                                \
-    case SZ:                                                    \
-      memcpy(eq->symbols, SYMBOLS, SZ * sizeof(enum symbol));   \
-      eq->sz = SZ;                                              \
-      break
+  if (position == nerdle->sz) {
+    if (equation_check_semantic(eq) == true &&  equation_check_equality(eq) == true) {
 
-    CASE_SET_EQ(5, first_eq_5);
-    CASE_SET_EQ(6, first_eq_6);
-    CASE_SET_EQ(7, first_eq_7);
-    CASE_SET_EQ(8, first_eq_8);
-    CASE_SET_EQ(9, first_eq_9);
-    CASE_SET_EQ(10, first_eq_10);
-    CASE_SET_EQ(11, first_eq_11);
-    CASE_SET_EQ(12, first_eq_12);
+      if (equation_get_variance(eq) == nerdle->sz) {
+        char str[LIMIT_MAX_EQ_SZ];
+        utils_eq_to_str(eq, str, nerdle->sz);
+        printf("%.*s\n", nerdle->sz, str);
+      }
+    }
+    return;
+  }
 
-#undef CASE_SET_EQ
-  };
+  for (uint32_t i = SYMBOL_0; i < SYMBOL_END; ++i) {
+    if (nerdle_check_symbol(nerdle, i, position) == false) {
+      continue;
+    }
+    if (equation_add_symbol(eq, i, position) == true) {
+      nerdle_generate_best_variance_equations_rec(nerdle, eq, position + 1);
+    }
+  }
 }
+
+void nerdle_generate_best_variance_equations(struct nerdle *nerdle)
+{
+  struct equation eq = { .sz = nerdle->sz };
+
+  for (uint32_t i = SYMBOL_1; i <= SYMBOL_9; ++i) {
+    eq.symbols[0] = i;
+    if (nerdle_check_symbol(nerdle, i, 0) == false) {
+      continue;
+    }
+    nerdle_generate_best_variance_equations_rec(nerdle, &eq, 1);
+  }
+}
+
+/* warning: singleton include */
+#include "first_equations.h"
 
 /**
  * Remove a candidate from the list of candidate.
@@ -359,25 +327,6 @@ void nerdle_check_candidates(struct nerdle *nerdle)
          nr_candidate_before - nerdle->nr_candidate, nerdle->nr_candidate);
 }
 
-/**
- * Variance means the number of different symbol in the equation.
- */
-static uint32_t candidate_get_variance(struct candidate *candidate)
-{
-  unsigned variance = 0;
-  bool once[SYMBOL_END] = { false };
-
-  for (unsigned i = 0; i < candidate->eq.sz; ++i) {
-    enum symbol symbol = candidate->eq.symbols[i];
-    if (once[symbol] == false) {
-      once[symbol] = true;
-      ++variance;
-    }
-  }
-
-  return variance;
-}
-
 void nerdle_find_best_equation(struct nerdle *nerdle, struct equation *eq)
 {
   nerdle_check_candidates(nerdle);
@@ -391,7 +340,7 @@ void nerdle_find_best_equation(struct nerdle *nerdle, struct equation *eq)
   unsigned best_variance = 0;
 
   while (candidate != NULL) {
-    unsigned variance = candidate_get_variance(candidate);
+    unsigned variance = equation_get_variance(&candidate->eq);
     if (variance > best_variance) {
       best_variance = variance;
       best_candidate = candidate;
